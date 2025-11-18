@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Trắc Nghiệm - Pháp Luật Đại Cương</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2.5em;
+            font-weight: 800;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .progress-container {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+        
+        .progress-text {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .progress-bar-bg {
+            background: rgba(255,255,255,0.3);
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(72,187,120,0.5);
+        }
+        
+        .question-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease;
+            animation-fill-mode: both;
+            border: 3px solid transparent;
+        }
+        
+        .question-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .question-card.answered {
+            border-color: #e8f5e9;
+        }
+        
+        .question-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .question-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(102,126,234,0.3);
+        }
+        
+        .question-text {
+            font-size: 1.15em;
+            font-weight: 600;
+            color: #2d3748;
+            line-height: 1.7;
+            flex: 1;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            background: #f8f9fa;
+            border: 3px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.05em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, rgba(102,126,234,0.1), transparent);
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+        
+        .option:hover:not(.correct):not(.incorrect):not(.disabled)::before {
+            width: 100%;
+        }
+        
+        .option:hover:not(.correct):not(.incorrect):not(.disabled) {
+            border-color: #667eea;
+            transform: translateX(8px);
+            background: white;
+        }
+        
+        .option-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 3px solid #cbd5e0;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .option:hover:not(.disabled) .option-icon {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+        
+        .option-text {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .option.correct {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border-color: #48bb78;
+            font-weight: 600;
+            animation: correctAnswer 0.5s ease;
+        }
+        
+        .option.correct .option-icon {
+            background: white;
+            border-color: white;
+        }
+        
+        .option.correct .option-icon::after {
+            content: '✓';
+            position: absolute;
+            color: #48bb78;
+            font-weight: bold;
+            font-size: 16px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .option.incorrect {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+            border-color: #f56565;
+            animation: incorrectAnswer 0.5s ease;
+        }
+        
+        .option.incorrect .option-icon {
+            background: white;
+            border-color: white;
+        }
+        
+        .option.incorrect .option-icon::after {
+            content: '✕';
+            position: absolute;
+            color: #f56565;
+            font-weight: bold;
+            font-size: 16px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            margin-top: 40px;
+            animation: fadeIn 1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+        }
+        
+        .summary-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .summary-header h2 {
+            font-size: 2em;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .summary-subtitle {
+            color: #718096;
+            font-size: 1.1em;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+        }
+        
+        .stat-card.correct-stat {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+        }
+        
+        .stat-card.incorrect-stat {
+            background: linear-gradient(135deg, #fed7d7, #fc8181);
+        }
+        
+        .stat-card.total-stat {
+            background: linear-gradient(135deg, #bee3f8, #90cdf4);
+        }
+        
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: 800;
+            color: #2d3748;
+            display: block;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 1.1em;
+            color: #4a5568;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 1.15em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+        }
+        
+        .reset-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(102,126,234,0.5);
+        }
+        
+        .reset-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .fill-blank {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            color: #92400e;
+            border: 2px solid #fbbf24;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes correctAnswer {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes incorrectAnswer {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Stagger animation for cards */
+        .question-card:nth-child(1) { animation-delay: 0.1s; }
+        .question-card:nth-child(2) { animation-delay: 0.15s; }
+        .question-card:nth-child(3) { animation-delay: 0.2s; }
+        .question-card:nth-child(4) { animation-delay: 0.25s; }
+        .question-card:nth-child(5) { animation-delay: 0.3s; }
+        .question-card:nth-child(6) { animation-delay: 0.35s; }
+        .question-card:nth-child(7) { animation-delay: 0.4s; }
+        .question-card:nth-child(8) { animation-delay: 0.45s; }
+        .question-card:nth-child(9) { animation-delay: 0.5s; }
+        .question-card:nth-child(10) { animation-delay: 0.55s; }
+        .question-card:nth-child(11) { animation-delay: 0.6s; }
+        .question-card:nth-child(12) { animation-delay: 0.65s; }
+        .question-card:nth-child(13) { animation-delay: 0.7s; }
+        .question-card:nth-child(14) { animation-delay: 0.75s; }
+        .question-card:nth-child(15) { animation-delay: 0.8s; }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .question-card {
+                padding: 20px;
+            }
+            
+            .question-text {
+                font-size: 1em;
+            }
+            
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚖️ Trắc Nghiệm Pháp Luật Đại Cương</h1>
+        <p>Kiểm tra kiến thức của bạn với 15 câu hỏi</p>
+    </div>
+
+    <div class="container">
+        <div class="progress-container">
+            <div class="progress-text">
+                <span>📊 Tiến độ</span>
+                <span id="progressText">0/15</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <!-- Câu 1 -->
+        <div class="question-card" data-answer="B">
+            <div class="question-header">
+                <div class="question-number">1</div>
+                <div class="question-text">Đâu không phải là nguyên nhân hình thành pháp luật?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="A">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Sự xuất hiện của lực lượng sản xuất và sự xuất hiện của tư hữu</div>
+                </div>
+                <div class="option" data-value="B">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Đấng tối cao tạo ra nhà nước, thông qua đó tạo ra pháp luật để nhà nước sử dụng để quản lý xã hội</div>
+                </div>
+                <div class="option" data-value="C">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Các quy tắc cũ được sử dụng trong xã hội nguyên thủy không còn hiệu lực</div>
+                </div>
+                <div class="option" data-value="D">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Sự xuất hiện của nhà nước</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 2 -->
+        <div class="question-card" data-answer="A">
+            <div class="question-header">
+                <div class="question-number">2</div>
+                <div class="question-text">Điền vào chỗ trống: "Pháp luật thể hiện ý chí của <span class="fill-blank">___</span> trong xã hội có giai cấp, là công cụ để điều chỉnh các quan hệ xã hội."</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="A">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Giai cấp thống trị</div>
+                </div>
+                <div class="option" data-value="B">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Giai cấp bị trị</div>
+                </div>
+                <div class="option" data-value="C">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Giai cấp nô lệ</div>
+                </div>
+                <div class="option" data-value="D">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Giai cấp cầm quyền</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 3 -->
+        <div class="question-card" data-answer="DUNG">
+            <div class="question-header">
+                <div class="question-number">3</div>
+                <div class="question-text">"Nhà nước chỉ đứng ra với vai trò điều hành, điều tiết thông qua hệ thống pháp luật". Đúng hay sai?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="DUNG">
+                    <div class="option-icon"></div>
+                    <div class="option-text">✓ Đúng</div>
+                </div>
+                <div class="option" data-value="SAI">
+                    <div class="option-icon"></div>
+                    <div class="option-text">✕ Sai</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 4 -->
+        <div class="question-card" data-answer="SAI">
+            <div class="question-header">
+                <div class="question-number">4</div>
+                <div class="question-text">"Pháp luật và quyền lực nhà nước có thể tồn tại độc lập". Đúng hay sai?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="DUNG">
+                    <div class="option-icon"></div>
+                    <div class="option-text">✓ Đúng</div>
+                </div>
+                <div class="option" data-value="SAI">
+                    <div class="option-icon"></div>
+                    <div class="option-text">✕ Sai</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 5 -->
+        <div class="question-card" data-answer="C">
+            <div class="question-header">
+                <div class="question-number">5</div>
+                <div class="question-text">Đáp án nào KHÔNG thể hiện: "Pháp luật tạo ra môi trường ổn định cho việc thiết lập các mối quan hệ bang giao giữa các quốc gia"?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="A">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Công ước Liên Hợp Quốc về Luật Biển giúp các nước xác định vùng biển và giải quyết tranh chấp</div>
+                </div>
+                <div class="option" data-value="B">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Các hiệp định thương mại quốc tế tạo khuôn khổ pháp lý cho trao đổi hàng hóa và đầu tư giữa các quốc gia</div>
+                </div>
+                <div class="option" data-value="C">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Luật điều chỉnh mua bán online giúp hình thành quan hệ giao dịch điện tử hợp pháp</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 6 -->
+        <div class="question-card" data-answer="A">
+            <div class="question-header">
+                <div class="question-number">6</div>
+                <div class="question-text">Chức năng nào là một trong những chức năng cơ bản và lâu dài của pháp luật, không chỉ dùng quyền lực để răn đe mà còn dùng lý lẽ để thuyết phục?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="A">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Chức năng giáo dục</div>
+                </div>
+                <div class="option" data-value="B">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Chức năng điều chỉnh</div>
+                </div>
+                <div class="option" data-value="C">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Chức năng bảo vệ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 7 -->
+        <div class="question-card" data-answer="D">
+            <div class="question-header">
+                <div class="question-number">7</div>
+                <div class="question-text">Đâu là mục tiêu của chức năng điều chỉnh?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="A">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Đảm bảo cho pháp luật được tôn trọng và thực thi trên thực tế bằng "sức mạnh cưỡng chế" của nhà nước</div>
+                </div>
+                <div class="option" data-value="B">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Nâng cao nhận thức và tri thức pháp lý để người dân "biết" và "hiểu" luật</div>
+                </div>
+                <div class="option" data-value="C">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Phòng ngừa và hạn chế vi phạm pháp luật</div>
+                </div>
+                <div class="option" data-value="D">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Tạo ra khuôn khổ, trật tự ổn định và rõ ràng cho các mối quan hệ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 8 -->
+        <div class="question-card" data-answer="VAITRO">
+            <div class="question-header">
+                <div class="question-number">8</div>
+                <div class="question-text">Chức năng của pháp luật là những phương hướng hoạt động cơ bản của pháp luật, thể hiện <span class="fill-blank">___</span>, <span class="fill-blank">___</span> và <span class="fill-blank">___</span> của nó trong việc quản lý xã hội và tác động đến các quan hệ xã hội.</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="VAITRO">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Vai trò, bản chất và mục đích</div>
+                </div>
+                <div class="option" data-value="OTHER">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Quyền lực, uy tín và sức mạnh</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 9 -->
+        <div class="question-card" data-answer="TRUCTIEP">
+            <div class="question-header">
+                <div class="question-number">9</div>
+                <div class="question-text">Cơ sở hạ tầng là nguyên nhân <span class="fill-blank">___</span> quyết định sự ra đời của pháp luật. (Trực tiếp hay gián tiếp?)</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="TRUCTIEP">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Trực tiếp</div>
+                </div>
+                <div class="option" data-value="GIANTIEP">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Gián tiếp</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 10 -->
+        <div class="question-card" data-answer="SAI">
+            <div class="question-header">
+                <div class="question-number">10</div>
+                <div class="question-text">"Pháp luật có thể cao hơn trình độ kinh tế hiện có". Đúng hay sai?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="DUNG">
+                    <div class="option-icon"></div>
+                    <div class="option-text">✓ Đúng</div>
+                </div>
+                <div class="option" data-value="SAI">
+                    <div class="option-icon"></div>
+                    <div class="option-text">✕ Sai</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 11 -->
+        <div class="question-card" data-answer="A">
+            <div class="question-header">
+                <div class="question-number">11</div>
+                <div class="question-text">Ở các giai đoạn phát triển kinh tế khác nhau thì nội dung pháp luật <span class="fill-blank">___</span>.</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="A">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Khác nhau</div>
+                </div>
+                <div class="option" data-value="B">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Giống nhau</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 12 -->
+        <div class="question-card" data-answer="C">
+            <div class="question-header">
+                <div class="question-number">12</div>
+                <div class="question-text">Pháp luật Nhà nước Việt Nam ta được xây dựng trên cơ sở:</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="A">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Đạo Phật</div>
+                </div>
+                <div class="option" data-value="B">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Đạo Thiên chúa</div>
+                </div>
+                <div class="option" data-value="C">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Tư tưởng Mác Lê-nin</div>
+                </div>
+                <div class="option" data-value="D">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Tư tưởng Nho giáo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 13 -->
+        <div class="question-card" data-answer="SAI">
+            <div class="question-header">
+                <div class="question-number">13</div>
+                <div class="question-text">Pháp luật ở một quốc gia không thể tồn tại học thuyết pháp lý của các quốc gia khác. Đúng hay sai?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="DUNG">
+                    <div class="option-icon"></div>
+                    <div class="option-text">✓ Đúng</div>
+                </div>
+                <div class="option" data-value="SAI">
+                    <div class="option-icon"></div>
+                    <div class="option-text">✕ Sai</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 14 -->
+        <div class="question-card" data-answer="D">
+            <div class="question-header">
+                <div class="question-number">14</div>
+                <div class="question-text">Nhà nước là một tổ chức đặc biệt của <span class="fill-blank">___</span>?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="A">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Quyền lực công</div>
+                </div>
+                <div class="option" data-value="B">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Quyền lực quân sự</div>
+                </div>
+                <div class="option" data-value="C">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Quyền lực tư tưởng</div>
+                </div>
+                <div class="option" data-value="D">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Quyền lực chính trị</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Câu 15 -->
+        <div class="question-card" data-answer="A">
+            <div class="question-header">
+                <div class="question-number">15</div>
+                <div class="question-text">Đâu không phải là cách thức bảo vệ (cơ chế hoạt động) của Chức năng bảo vệ?</div>
+            </div>
+            <div class="options">
+                <div class="option" data-value="A">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Giải quyết các mâu thuẫn, tranh chấp nhỏ trong cộng đồng dân cư</div>
+                </div>
+                <div class="option" data-value="B">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Quy định cấm</div>
+                </div>
+                <div class="option" data-value="C">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Áp dụng cưỡng chế</div>
+                </div>
+                <div class="option" data-value="D">
+                    <div class="option-icon"></div>
+                    <div class="option-text">Quy định chế tài</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-card">
+            <div class="summary-header">
+                <h2>🏆 Kết Quả Bài Thi</h2>
+                <p class="summary-subtitle">Xem tổng kết điểm số của bạn</p>
+            </div>
+            <div class="summary-stats">
+                <div class="stat-card correct-stat">
+                    <div class="stat-icon">✅</div>
+                    <span class="stat-number" id="correctCount">0</span>
+                    <div class="stat-label">Câu đúng</div>
+                </div>
+                <div class="stat-card incorrect-stat">
+                    <div class="stat-icon">❌</div>
+                    <span class="stat-number" id="incorrectCount">0</span>
+                    <div class="stat-label">Câu sai</div>
+                </div>
+                <div class="stat-card total-stat">
+                    <div class="stat-icon">📝</div>
+                    <span class="stat-number" id="totalCount">0</span>
+                    <div class="stat-label">Đã trả lời</div>
+                </div>
+            </div>
+            <button class="reset-btn" onclick="resetQuiz()">🔄 Làm lại bài thi</button>
+        </div>
+    </div>
+
+    <script>
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let totalAnswered = 0;
+        const totalQuestions = 15;
+
+        // Add click handlers to all options
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                const question = this.closest('.question-card');
+                const correctAnswer = question.dataset.answer;
+                const selectedAnswer = this.dataset.value;
+                const allOptions = question.querySelectorAll('.option');
+                
+                // Check if already answered
+                if (question.classList.contains('answered')) {
+                    return;
+                }
+                
+                // Mark question as answered
+                question.classList.add('answered');
+                totalAnswered++;
+                
+                // Disable all options in this question
+                allOptions.forEach(opt => opt.classList.add('disabled'));
+                
+                // Check if answer is correct
+                if (selectedAnswer === correctAnswer) {
+                    this.classList.add('correct');
+                    correctAnswers++;
+                } else {
+                    this.classList.add('incorrect');
+                    incorrectAnswers++;
+                    // Show the correct answer
+                    allOptions.forEach(opt => {
+                        if (opt.dataset.value === correctAnswer) {
+                            opt.classList.add('correct');
+                        }
+                    });
+                }
+                
+                // Update summary and progress
+                updateSummary();
+                updateProgress();
+                
+                // Scroll to next question if not last
+                if (totalAnswered < totalQuestions) {
+                    setTimeout(() => {
+                        const allQuestions = document.querySelectorAll('.question-card');
+                        const nextQuestion = allQuestions[totalAnswered];
+                        if (nextQuestion) {
+                            nextQuestion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 800);
+                } else {
+                    // Scroll to summary if all answered
+                    setTimeout(() => {
+                        document.querySelector('.summary-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 800);
+                }
+            });
+        });
+
+        function updateSummary() {
+            document.getElementById('correctCount').textContent = correctAnswers;
+            document.getElementById('incorrectCount').textContent = incorrectAnswers;
+            document.getElementById('totalCount').textContent = totalAnswered;
+        }
+
+        function updateProgress() {
+            const percentage = (totalAnswered / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = totalAnswered + '/' + totalQuestions;
+        }
+
+        function resetQuiz() {
+            // Reset counters
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            totalAnswered = 0;
+            
+            // Reset all questions
+            document.querySelectorAll('.question-card').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.option').forEach(option => {
+                    option.classList.remove('correct', 'incorrect', 'disabled');
+                });
+            });
+            
+            // Update summary and progress
+            updateSummary();
+            updateProgress();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
